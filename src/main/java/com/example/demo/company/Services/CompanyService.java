@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.example.demo.Exceptions.ResourceNotFoundException;
 import com.example.demo.company.DTO.CreateCompanyRequest;
 import com.example.demo.company.Entity.Company;
 import com.example.demo.company.Repository.CompanyRepository;
@@ -24,8 +25,10 @@ public class CompanyService {
 
     public Company createCompany(CreateCompanyRequest request, String email) {
 
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+       User user = userRepository.findByEmail(email)
+        .orElseThrow(() ->
+                new ResourceNotFoundException(
+                        "User not found"));
 
         Company company = new Company();
         company.setName(request.name);
@@ -40,8 +43,9 @@ public class CompanyService {
     public List<Company> getMyCompanies(String email) {
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
+        .orElseThrow(() ->
+                new ResourceNotFoundException(
+                        "User not found"));
         return companyRepository.findByUserId(user.getId());
     }
 

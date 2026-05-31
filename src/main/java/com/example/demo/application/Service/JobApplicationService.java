@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.example.demo.Exceptions.ResourceNotFoundException;
 import com.example.demo.application.DTO.CreateApplicationRequest;
 import com.example.demo.application.Entity.ApplicationStatus;
 import com.example.demo.application.Entity.JobApplication;
@@ -36,10 +37,16 @@ public class JobApplicationService {
             String email) {
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow();
+        .orElseThrow(() ->
+                new ResourceNotFoundException(
+                        "User not found"));
 
-        Company company = companyRepository.findById(request.companyId)
-                .orElseThrow();
+       Company company =
+        companyRepository.findById(
+                request.companyId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Company not found"));
 
         JobApplication application = new JobApplication();
 
@@ -64,7 +71,9 @@ public class JobApplicationService {
             String email) {
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow();
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "User not found"));
 
         return applicationRepository.findByUserId(user.getId());
     }

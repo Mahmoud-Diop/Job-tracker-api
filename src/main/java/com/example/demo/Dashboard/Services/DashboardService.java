@@ -3,6 +3,7 @@ package com.example.demo.Dashboard.Services;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.Dashboard.DTO.DashboardStatsResponse;
+import com.example.demo.Exceptions.ResourceNotFoundException;
 import com.example.demo.application.Entity.ApplicationStatus;
 import com.example.demo.application.Repository.JobApplicationRepository;
 import com.example.demo.user.Entity.User;
@@ -27,8 +28,10 @@ public class DashboardService {
             String email) {
 
         User user = userRepository
-                .findByEmail(email)
-                .orElseThrow();
+        .findByEmail(email)
+        .orElseThrow(() ->
+                new ResourceNotFoundException(
+                        "User not found"));
 
         Long userId = user.getId();
 

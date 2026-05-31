@@ -1,5 +1,8 @@
 package com.example.demo.auth.services;
 
+import com.example.demo.Exceptions.DuplicateResourceException;
+import com.example.demo.Exceptions.ResourceNotFoundException;
+import com.example.demo.Exceptions.UnauthorizedException;
 import com.example.demo.auth.DTO.AuthResponse;
 import com.example.demo.auth.DTO.LoginRequest;
 import com.example.demo.auth.DTO.RegisterRequest;
@@ -32,7 +35,8 @@ public class AuthService {
         Optional<User> existingUser = userRepository.findByEmail(request.email);
 
         if (existingUser.isPresent()) {
-            throw new RuntimeException("Email already exists");
+            throw new DuplicateResourceException(
+                    "Email already exists");
         }
 
         User user = new User();
@@ -50,12 +54,16 @@ public class AuthService {
     public AuthResponse login(LoginRequest request) {
 
         User user = userRepository.findByEmail(request.email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "User not found"));
 
-        if (!passwordEncoder.matches(request.password, user.getPassword())) {
-            throw new RuntimeException("Invalid password");
+        if (!passwordEncoder.matches(
+                request.password,
+                user.getPassword())) {
+
+            throw new UnauthorizedException(
+                    "Invalid email or password");
         }
-
         String token = jwtService.generateToken(user.getEmail());
 
         return new AuthResponse(token);
