@@ -1,8 +1,11 @@
 package com.example.demo.application.Controller;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.demo.application.DTO.CreateApplicationRequest;
+import com.example.demo.application.DTO.JobApplicationResponse;
+import com.example.demo.application.DTO.UpdateApplicationStatusRequest;
 import com.example.demo.application.Entity.JobApplication;
 import com.example.demo.application.Service.JobApplicationService;
 
@@ -20,22 +23,32 @@ public class JobApplicationController {
     }
 
     @PostMapping
-    public JobApplication create(
+    public JobApplicationResponse create(
             @RequestBody CreateApplicationRequest request,
             Authentication authentication) {
 
         return service.create(
                 request,
-                authentication.getName()
-        );
+                authentication.getName());
     }
 
     @GetMapping
-    public List<JobApplication> getMyApplications(
+    public List<JobApplicationResponse> getMyApplications(
             Authentication authentication) {
 
         return service.getMyApplications(
-                authentication.getName()
-        );
+                authentication.getName());
+    }
+
+    @PatchMapping("/{id}/status")
+    public JobApplicationResponse updateStatus(
+            @PathVariable Long id,
+            @RequestBody UpdateApplicationStatusRequest request,
+            Authentication authentication) {
+
+        return service.updateStatus(
+                id,
+                request,
+                authentication.getName());
     }
 }
