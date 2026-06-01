@@ -1,8 +1,10 @@
 package com.example.demo.application.Controller;
 
+import org.springframework.data.domain.Page;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import com.example.demo.application.DTO.ApplicationFilterRequest;
 import com.example.demo.application.DTO.CreateApplicationRequest;
 import com.example.demo.application.DTO.JobApplicationResponse;
 import com.example.demo.application.DTO.UpdateApplicationStatusRequest;
@@ -33,11 +35,12 @@ public class JobApplicationController {
     }
 
     @GetMapping
-    public List<JobApplicationResponse> getMyApplications(
+    public Page<JobApplicationResponse> getMyApplications(
             Authentication authentication) {
 
-        return service.getMyApplications(
-                authentication.getName());
+        return service.getApplications(
+                authentication.getName(),
+                new ApplicationFilterRequest());
     }
 
     @PatchMapping("/{id}/status")

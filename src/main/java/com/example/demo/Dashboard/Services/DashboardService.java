@@ -72,7 +72,9 @@ public class DashboardService {
 
         stats.setOffer(
                 applicationRepository.countByUserIdAndStatus(
+
                         userId,
+                        
                         ApplicationStatus.OFFER
                 )
         );

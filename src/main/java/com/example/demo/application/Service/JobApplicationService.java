@@ -3,10 +3,15 @@ package com.example.demo.application.Service;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.Exceptions.ForbiddenException;
 import com.example.demo.Exceptions.ResourceNotFoundException;
+import com.example.demo.application.DTO.ApplicationFilterRequest;
 import com.example.demo.application.DTO.CreateApplicationRequest;
 import com.example.demo.application.DTO.JobApplicationResponse;
 import com.example.demo.application.DTO.UpdateApplicationStatusRequest;
@@ -69,16 +74,56 @@ public class JobApplicationService {
                 return convertToResponse(savedApplication);
         }
 
-        public List<JobApplicationResponse> getMyApplications(
-                        String email) {
+        public Page<JobApplicationResponse> getApplications(
+                        String email,
+                        ApplicationFilterRequest filter) {
 
                 User user = userRepository.findByEmail(email)
-                                .orElseThrow(() -> new ResourceNotFoundException(
-                                                "User not found"));
+                                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-                return applicationRepository.findByUserId(user.getId()).stream()
-                                .map(this::convertToResponse)
-                                .collect(java.util.stream.Collectors.toList());
+                Sort sort = filter.direction.equalsIgnoreCase("ASC")
+                                ? Sort.by(filter.sortBy).ascending()
+                                : Sort.by(filter.sortBy).descending();
+
+                Pageable pageable = PageRequest.of(
+                                filter.page,
+                                filter.size,
+                                sort);
+
+                Page<JobApplication> result;
+
+                // CAS 1 : recherche + status
+                if (filter.status != null && filter.search != null) {
+
+                        result = applicationRepository
+                                        .findByUserIdAndStatus(user.getId(), filter.status, pageable)
+                                        .map(app -> app);
+                }
+
+                // CAS 2 : status seulement
+                else if (filter.status != null) {
+
+                        result = applicationRepository
+                                        .findByUserIdAndStatus(user.getId(), filter.status, pageable);
+                }
+
+                // CAS 3 : search seulement
+                else if (filter.search != null) {
+
+                        result = applicationRepository
+                                        .findByUserIdAndPositionContainingIgnoreCase(
+                                                        user.getId(),
+                                                        filter.search,
+                                                        pageable);
+                }
+
+                // CAS 4 : tout
+                else {
+                        result = applicationRepository
+                                        .findByUserId(user.getId(), pageable);
+                }
+
+                return result.map(JobApplicationMapper::toResponse);
         }
 
         public JobApplicationResponse updateStatus(
