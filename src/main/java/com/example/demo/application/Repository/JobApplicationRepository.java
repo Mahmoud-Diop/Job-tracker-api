@@ -9,12 +9,10 @@ import org.springframework.stereotype.Repository;
 
 import com.example.demo.application.Entity.ApplicationStatus;
 import com.example.demo.application.Entity.JobApplication;
-
 @Repository
 public interface JobApplicationRepository
         extends JpaRepository<JobApplication, Long> {
 
-    // Pagination
     Page<JobApplication> findByUserId(
             Long userId,
             Pageable pageable);
@@ -29,7 +27,12 @@ public interface JobApplicationRepository
             String position,
             Pageable pageable);
 
-    // Dashboard
+    Page<JobApplication> findByUserIdAndStatusAndPositionContainingIgnoreCase(
+            Long userId,
+            ApplicationStatus status,
+            String position,
+            Pageable pageable);
+
     long countByUserId(Long userId);
 
     long countByUserIdAndStatus(

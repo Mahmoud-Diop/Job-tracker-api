@@ -12,15 +12,13 @@ import com.example.demo.application.Entity.JobApplication;
 import com.example.demo.application.Service.JobApplicationService;
 
 import java.util.List;
-
 @RestController
 @RequestMapping("/api/applications")
 public class JobApplicationController {
 
     private final JobApplicationService service;
 
-    public JobApplicationController(
-            JobApplicationService service) {
+    public JobApplicationController(JobApplicationService service) {
         this.service = service;
     }
 
@@ -35,12 +33,13 @@ public class JobApplicationController {
     }
 
     @GetMapping
-    public Page<JobApplicationResponse> getMyApplications(
+    public Page<JobApplicationResponse> getApplications(
+            @ModelAttribute ApplicationFilterRequest filter,
             Authentication authentication) {
 
         return service.getApplications(
-                authentication.getName(),
-                new ApplicationFilterRequest());
+                filter,
+                authentication.getName());
     }
 
     @PatchMapping("/{id}/status")
